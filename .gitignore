@@ -1,0 +1,7 @@
+.DS_Store
+.photo-index-cache/
+*.csv
+*-warnings*.txt
+*-failed-scan-*.txt
+*.photo-index-lock/
+test-results/

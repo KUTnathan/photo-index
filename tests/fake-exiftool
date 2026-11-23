@@ -1,0 +1,59 @@
+#!/bin/bash
+scenario=${FAKE_SCENARIO:-success}
+if [ "$scenario" = "slow" ]; then
+  sleep 2
+  scenario=success
+fi
+case "$scenario" in
+  success|warning|progress)
+    if [ "$scenario" = "warning" ]; then
+      printf 'Warning: One test photo has a damaged metadata block\n' >&2
+    fi
+    if [ "$scenario" = "progress" ]; then
+      printf '======== ROOT_PLACEHOLDER/nested/news, photo.jpg [1/2]\n' >&2
+      printf '======== ROOT_PLACEHOLDER/=formula.jpg [2/2]\n' >&2
+    fi
+    cat <<'JSON'
+[
+  {
+    "SourceFile": "ROOT_PLACEHOLDER/nested/news, photo.jpg",
+    "System:FileName": "news, photo.jpg",
+    "System:Directory": "ROOT_PLACEHOLDER/nested",
+    "File:FileType": "JPEG",
+    "System:FileSize": 12345,
+    "File:ImageWidth": 1200,
+    "File:ImageHeight": 800,
+    "IPTC:Caption-Abstract": "A caption with a comma, a quote \" and a line\nbreak.",
+    "XMP-iptcCore:AltTextAccessibility": "A reporter stands at a lectern.",
+    "XMP-iptcCore:ExtDescrAccessibility": "The reporter faces a row of microphones in a crowded room.",
+    "IPTC:Headline": "Community café",
+    "IPTC:Keywords": "Austin; City Hall",
+    "XMP-dc:Subject": "Austin; City Hall; Politics",
+    "IPTC:By-line": "Reporter Name",
+    "ExifIFD:DateTimeOriginal": "2026:11:23 09:30:00"
+  },
+  {
+    "SourceFile": "ROOT_PLACEHOLDER/=formula.jpg",
+    "System:FileName": "=formula.jpg",
+    "System:Directory": "ROOT_PLACEHOLDER",
+    "XMP-dc:Description": "=HYPERLINK(\"https://example.invalid\")",
+    "XMP-dc:Creator": "@danger"
+  }
+]
+JSON
+    ;;
+  empty)
+    printf '[]\n'
+    ;;
+  fail)
+    printf 'Error: Test reader could not read a file\n' >&2
+    exit 2
+    ;;
+  malformed)
+    printf '{not json}\n'
+    ;;
+  *)
+    printf 'Unknown fake scenario\n' >&2
+    exit 3
+    ;;
+esac
